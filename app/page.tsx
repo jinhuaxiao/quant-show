@@ -1,103 +1,111 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useCallback } from 'react';
+import Link from 'next/link';
+import { ComplexityPanel } from './components/ComplexityPanel';
+import { AlgorithmComparison } from './components/AlgorithmComparison';
+import { SearchSpaceVisualization } from './components/SearchSpaceVisualization';
+import { CorrelationHeatmap } from './components/CorrelationHeatmap';
+import { ControlPanel } from './components/ControlPanel';
+
+export default function MedallionAlgorithm() {
+  const [parameters, setParameters] = useState({
+    n: 50, // 因子池大小
+    k: 10, // 选择因子数
+    s: 5,  // 步长选项
+  });
+
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [activeAlgorithm, setActiveAlgorithm] = useState('genetic');
+
+  const updateParameters = useCallback((newParams: Partial<typeof parameters>) => {
+    setParameters(prev => ({ ...prev, ...newParams }));
+  }, []);
+
+  const startDemo = useCallback(() => {
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 10000);
+  }, []);
+
+  const compareAlgorithms = useCallback(() => {
+    alert('算法对比演示：\n\n' +
+          '穷举搜索: 需要357年\n' +
+          '贪婪算法: 2秒完成，但可能错过最优解\n' +
+          'LASSO: 30秒完成，数学优雅\n' +
+          '遗传算法: 2分钟完成，全局搜索\n' +
+          '粒子群: 1分钟完成，快速收敛\n\n' +
+          '效率提升: 10^13倍！');
+  }, []);
+
+  const resetDemo = useCallback(() => {
+    setParameters({ n: 50, k: 10, s: 5 });
+    setIsAnimating(false);
+    setActiveAlgorithm('genetic');
+  }, []);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] to-[#151932] text-gray-200">
+      <div className="max-w-7xl mx-auto p-4 lg:p-8">
+        {/* Header */}
+        <header className="text-center py-8 border-b-2 border-gray-700 mb-8">
+          <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-4">
+            MEDALLION ALGORITHM
+          </h1>
+          <p className="text-gray-400 text-lg">
+            量化因子组合优化复杂性与算法解决方案可视化
+          </p>
+        </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        {/* Main Content */}
+        <div className="space-y-8">
+          {/* Complexity Panel */}
+          <ComplexityPanel 
+            parameters={parameters}
+            onParametersChange={updateParameters}
+          />
+
+          {/* Algorithm Comparison */}
+          <AlgorithmComparison 
+            activeAlgorithm={activeAlgorithm}
+            onAlgorithmChange={setActiveAlgorithm}
+          />
+
+          {/* Search Space Visualization */}
+          <SearchSpaceVisualization 
+            isAnimating={isAnimating}
+            parameters={parameters}
+          />
+
+          {/* Correlation Heatmap */}
+          <CorrelationHeatmap />
+
+          {/* Control Panel */}
+          <ControlPanel 
+            onStartDemo={startDemo}
+            onCompareAlgorithms={compareAlgorithms}
+            onReset={resetDemo}
+            isAnimating={isAnimating}
+          />
+
+          {/* Navigation to Trading Flow */}
+          <div className="mt-12 text-center">
+            <div className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-blue-400/30 rounded-xl p-8">
+              <h3 className="text-2xl font-bold text-blue-400 mb-4">
+                完整量化交易流程
+              </h3>
+              <p className="text-gray-300 mb-6">
+                体验从因子筛选到自动交易的完整量化流程，包含实时可视化和智能决策
+              </p>
+              <Link 
+                href="/trading" 
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/30"
+              >
+                开启交易流程 →
+              </Link>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
