@@ -391,9 +391,9 @@ export default function FactorAnalysisPage() {
                 <div className="bg-gray-900/50 rounded-lg p-4">
                   <h4 className="text-green-400 font-medium mb-2">✓ 选择标准</h4>
                   <ul className="space-y-1 text-sm text-gray-300">
-                    <li>• IC绝对值 > 0.02</li>
-                    <li>• IR值 > 1.5</li>
-                    <li>• 因子间相关性 < 0.6</li>
+                    <li>• IC绝对值 &gt; 0.02</li>
+                    <li>• IR值 &gt; 1.5</li>
+                    <li>• 因子间相关性 &lt; 0.6</li>
                     <li>• 历史稳定性高</li>
                   </ul>
                 </div>
@@ -537,7 +537,7 @@ export default function FactorAnalysisPage() {
                 <div className="text-center">
                   <div className="text-3xl font-bold text-green-400 mb-2">98.5%</div>
                   <div className="text-sm text-gray-400">收敛度</div>
-                  <div className="mt-2 text-xs text-gray-500">连续10代改进 < 0.1%</div>
+                  <div className="mt-2 text-xs text-gray-500">连续10代改进 &lt; 0.1%</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-400 mb-2">42</div>
@@ -640,11 +640,11 @@ export default function FactorAnalysisPage() {
                     <ul className="space-y-1 text-sm text-gray-300">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        市值 > 20亿
+                        市值 &gt; 20亿
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        日均成交额 > 5000万
+                        日均成交额 &gt; 5000万
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
@@ -652,7 +652,7 @@ export default function FactorAnalysisPage() {
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        上市时间 > 60天
+                        上市时间 &gt; 60天
                       </li>
                     </ul>
                   </div>
