@@ -9,13 +9,14 @@ interface ComplexityPanelProps {
     n: number;
     k: number;
     s: number;
+    w?: number;
   };
-  onParametersChange: (params: Partial<{ n: number; k: number; s: number }>) => void;
+  onParametersChange: (params: Partial<{ n: number; k: number; s: number; w?: number }>) => void;
 }
 
 export function ComplexityPanel({ parameters, onParametersChange }: ComplexityPanelProps) {
   const calculations = useMemo(() => {
-    const { n, k, s } = parameters;
+    const { n, k, s, w = 10 } = parameters;
     
     // Calculate combinations using logarithms to prevent overflow
     const logCombination = (n: number, k: number) => {
@@ -31,7 +32,11 @@ export function ComplexityPanel({ parameters, onParametersChange }: ComplexityPa
 
     const logBasicCombo = logCombination(n, k);
     const basicCombo = Math.exp(logBasicCombo);
-    const totalCombo = basicCombo * Math.pow(s, k);
+    // 步长越小，每个因子的可能取值越多
+    const valuesPerFactor = Math.max(1, Math.floor(10 / s)); // 因子值的精度
+    // 权重增加了另一个维度的复杂度
+    // 每个因子不仅有值，还有权重（权重有w个可能值）
+    const totalCombo = basicCombo * Math.pow(valuesPerFactor * w, k);
 
     // Format numbers
     const formatNumber = (num: number) => {

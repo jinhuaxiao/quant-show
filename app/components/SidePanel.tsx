@@ -8,6 +8,7 @@ interface Parameters {
   n: number;
   k: number;
   s: number;
+  w?: number;
 }
 
 interface SidePanelProps {
