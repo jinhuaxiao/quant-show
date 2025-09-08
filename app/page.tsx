@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Layers, TrendingUp, Activity } from 'lucide-react';
+import { ChevronRight, Layers, TrendingUp, Activity, Wallet, BarChart3 } from 'lucide-react';
 import { ComplexityPanel } from './components/ComplexityPanel';
 import { AlgorithmComparison } from './components/AlgorithmComparison';
 import { SearchSpaceVisualization } from './components/SearchSpaceVisualization';
@@ -45,6 +45,14 @@ export default function MedallionAlgorithm() {
               <Link href="/trading" className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
                 <TrendingUp className="w-4 h-4" />
                 交易流程
+              </Link>
+              <Link href="/backtest-analysis" className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
+                <BarChart3 className="w-4 h-4" />
+                回测分析
+              </Link>
+              <Link href="/fund-management" className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
+                <Wallet className="w-4 h-4" />
+                资金管理
               </Link>
               <button
                 onClick={startDemo}
@@ -179,18 +187,18 @@ export default function MedallionAlgorithm() {
           
           <div className="bg-gradient-to-r from-green-500/10 to-emerald-600/10 border border-green-400/30 rounded-xl p-8">
             <h3 className="text-2xl font-bold text-green-400 mb-4">
-              相关性过滤原理
+              智能资金管理
             </h3>
             <p className="text-gray-300 mb-6">
-              了解如何通过因子筛选降低组合复杂度
+              体验3000万资金的风险预算和智能决策引擎
             </p>
-            <button
-              onClick={startDemo}
+            <Link
+              href="/fund-management"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all"
             >
-              查看演示
-              <Activity className="w-5 h-5" />
-            </button>
+              资金管理
+              <Wallet className="w-5 h-5" />
+            </Link>
           </div>
         </div>
         </div>
