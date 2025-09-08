@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, TrendingUp, RefreshCw, Activity, Layers, Target, Brain, Clock, BarChart3, GitBranch, Zap } from 'lucide-react';
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, RadialBarChart, RadialBar, PolarGrid, PolarAngleAxis, Sankey } from 'recharts';
+import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { motion } from 'framer-motion';
 
 // 时间维度数据 - 模拟从2019年9月到2024年的月度数据
@@ -22,7 +22,6 @@ const factorEvolution = timePoints.map((date, index) => {
   ];
   
   // 模拟因子动态调整
-  const activeFactor = index % 4;
   const newFactors = index > 10 ? ['jq_MASS_p_abs', 'jq_VEMA26_p_flip'] : [];
   const droppedFactors = index > 15 ? ['TA_SUB_abs'] : [];
   
@@ -98,7 +97,7 @@ const performanceMetrics = timePoints.map((date, index) => ({
 
 export default function TemporalAnalysisPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('all');
-  const [selectedMetric, setSelectedMetric] = useState('factors');
+  const [selectedMetric] = useState('factors');
   const [animationKey, setAnimationKey] = useState(0);
 
   // 触发动画
@@ -107,7 +106,7 @@ export default function TemporalAnalysisPage() {
   }, [selectedPeriod, selectedMetric]);
 
   // 过滤数据基于选择的时间段
-  const filterDataByPeriod = (data: any[]) => {
+  const filterDataByPeriod = <T,>(data: T[]): T[] => {
     if (selectedPeriod === 'all') return data;
     const periods = {
       '1Y': 12,
@@ -403,7 +402,7 @@ export default function TemporalAnalysisPage() {
               <Tooltip 
                 contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
                 labelStyle={{ color: '#9CA3AF' }}
-                formatter={(value: any) => `${(value * 100).toFixed(1)}%`}
+                formatter={(value: number) => `${(value * 100).toFixed(1)}%`}
               />
               <Legend />
               {factorWeightTimeSeries.map((factor, index) => (

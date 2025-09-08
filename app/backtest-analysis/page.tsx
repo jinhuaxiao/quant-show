@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Calendar, DollarSign, Percent, AlertTriangle, Download, Play, Pause, RotateCcw } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
@@ -49,7 +49,7 @@ const generateBacktestData = () => {
 };
 
 // 计算性能指标
-const calculateMetrics = (data: any[]) => {
+const calculateMetrics = (data: { portfolio: number; dailyReturn: number; drawdown: number; trades: number }[]) => {
   if (data.length === 0) return null;
   
   const returns = data.map(d => d.dailyReturn / 100);
@@ -376,7 +376,7 @@ export default function BacktestAnalysisPage() {
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
                     labelStyle={{ color: '#9CA3AF' }}
-                    formatter={(value: any) => [`¥${(value / 1000).toFixed(0)}K`, '']}
+                    formatter={(value: number) => [`¥${(value / 1000).toFixed(0)}K`, '']}
                   />
                   <Legend />
                   <Area 
@@ -427,13 +427,13 @@ export default function BacktestAnalysisPage() {
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
                     labelStyle={{ color: '#9CA3AF' }}
-                    formatter={(value: any) => [`${value.toFixed(2)}%`, '日收益']}
+                    formatter={(value: number) => [`${value.toFixed(2)}%`, '日收益']}
                   />
                   <ReferenceLine y={0} stroke="#6B7280" />
                   <Bar 
                     dataKey="dailyReturn" 
                     name="日收益率"
-                    fill={(data: any) => data.dailyReturn > 0 ? '#10B981' : '#EF4444'}
+                    fill="#3B82F6"
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -464,7 +464,7 @@ export default function BacktestAnalysisPage() {
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
                     labelStyle={{ color: '#9CA3AF' }}
-                    formatter={(value: any) => [`${value.toFixed(2)}%`, '回撤']}
+                    formatter={(value: number) => [`${value.toFixed(2)}%`, '回撤']}
                   />
                   <Area 
                     type="monotone" 

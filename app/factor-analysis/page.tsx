@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Search, Filter, TrendingUp, Activity, Layers, Target, Brain, Zap, CheckCircle, XCircle, AlertCircle, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Search, Filter, TrendingUp, Activity, Layers, Target, Brain, Zap, CheckCircle, ChevronRight } from 'lucide-react';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar, LineChart, Line, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
 import { motion } from 'framer-motion';
 

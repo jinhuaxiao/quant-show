@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { Shield, AlertTriangle, Gauge, Wallet, RefreshCcw, LineChart as LineChartIcon, TrendingUp, Brain, Info, ClipboardList, Download, Play, ArrowLeft } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, ReferenceDot } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 
 function invert2x2(m: number[][]) {
@@ -236,8 +236,8 @@ export default function FundManagementPage() {
   // 历史回放数据
   function seedRand(seed: number) { return Math.abs(Math.sin(seed * 12.9898 + 78.233)) % 1; }
   const historySeries = useMemo(() => {
-    const arr: any[] = [];
-    let baseVol = calc.portVol;
+    const arr: Array<{ day: number; target: number; realized: number; decision: number }> = [];
+    const baseVol = calc.portVol;
     for (let d = historyDays - 1; d >= 0; d--) {
       const t = d + 1;
       const noise = (seedRand(t) - 0.5) * 0.03;
@@ -270,7 +270,7 @@ export default function FundManagementPage() {
     });
   }
 
-  function toCSV(rows: any[]) {
+  function toCSV(rows: Array<Record<string, unknown>>) {
     const headers = ["date","strategy","action","amount","reasons","targetNotional","currentNotional","gap","impactBps"];
     const lines = [headers.join(",")].concat(rows.map(r => headers.map(h => JSON.stringify(r[h] ?? "")).join(",")));
     return lines.join("\n");
@@ -322,7 +322,7 @@ export default function FundManagementPage() {
     资金等价: Math.round(calc.notionals[i]) 
   }));
 
-  function lightOf(s: any) {
+  function lightOf(s: { drawdown: number; sigmaReal: number }) {
     if (s.drawdown > 0.2) return { label: "红", color: "bg-red-500" };
     if (s.drawdown > 0.1) return { label: "橙", color: "bg-orange-500" };
     if (s.drawdown > 0.05) return { label: "黄", color: "bg-yellow-400" };
@@ -448,7 +448,7 @@ export default function FundManagementPage() {
                   <YAxis yAxisId="left" orientation="left" tick={{ fontSize: 12, fill: '#9CA3AF' }} domain={[0, 100]} />
                   <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12, fill: '#9CA3AF' }} />
                   <Tooltip 
-                    formatter={(v: any, name: any) => (name === "权重" ? `${v}%` : `￥${fmtMoney(Number(v))}`)}
+                    formatter={(v: number, name: string) => (name === "权重" ? `${v}%` : `￥${fmtMoney(Number(v))}`)}
                     contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }}
                     labelStyle={{ color: '#9CA3AF' }}
                   />
@@ -467,7 +467,7 @@ export default function FundManagementPage() {
                   <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#9CA3AF' }} />
                   <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} domain={[0, 100]} />
                   <Tooltip 
-                    formatter={(v: any) => `${v}%`}
+                    formatter={(v: number) => `${v}%`}
                     contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }}
                     labelStyle={{ color: '#9CA3AF' }}
                   />
@@ -502,7 +502,7 @@ export default function FundManagementPage() {
                 <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#9CA3AF' }} />
                 <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} />
                 <Tooltip 
-                  formatter={(v: any, name: any, props: any) => name === "target" || name === "realized" ? `${Number(v).toFixed(1)}%` : v}
+                  formatter={(v: number, name: string) => name === "target" || name === "realized" ? `${Number(v).toFixed(1)}%` : v}
                   contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }}
                   labelStyle={{ color: '#9CA3AF' }}
                 />
@@ -513,7 +513,7 @@ export default function FundManagementPage() {
                   strokeWidth={2}
                   name="实际波动"
                   stroke="#3B82F6"
-                  dot={(p: any) => {
+                  dot={(p: { cx: number; cy: number; payload: { decision: number }; index: number }) => {
                     const { cx, cy, payload, index } = p;
                     const color = payload.decision > 0 ? "#10b981" : payload.decision < 0 ? "#ef4444" : "#94a3b8";
                     return <circle key={`dot-${index}`} cx={cx} cy={cy} r={4} fill={color} stroke="#fff" strokeWidth={1} />;
@@ -588,7 +588,7 @@ export default function FundManagementPage() {
                   <div className="bg-white/5 rounded-xl p-3 border border-slate-600">
                     <div className="text-xs font-medium text-slate-300 mb-1">持有（不变）理由</div>
                     <ul className="text-xs text-slate-300 list-disc ml-4 space-y-1 min-h-[3rem]">
-                      {d.holdReasons?.length ? d.holdReasons.map((r, idx) => <li key={idx}>{r}</li>) : <li className="opacity-60">若出现"持有"，会在此解释原因</li>}
+                      {d.holdReasons?.length ? d.holdReasons.map((r, idx) => <li key={idx}>{r}</li>) : <li className="opacity-60">若出现&ldquo;持有&rdquo;，会在此解释原因</li>}
                     </ul>
                   </div>
                 </div>
@@ -807,7 +807,7 @@ export default function FundManagementPage() {
               </tbody>
             </table>
           </div>
-          <div className="text-xs text-slate-400 mt-2">说明：金额受"最小调整单元 / 日内最大缺口比例 / 日内最大可分配比例 / 保证金缓冲"等多约束同时限制。</div>
+          <div className="text-xs text-slate-400 mt-2">说明：金额受&ldquo;最小调整单元 / 日内最大缺口比例 / 日内最大可分配比例 / 保证金缓冲&rdquo;等多约束同时限制。</div>
         </div>
 
         {/* 执行单预览 */}
@@ -874,7 +874,7 @@ export default function FundManagementPage() {
 
         {/* 页脚 */}
         <div className="text-xs text-slate-500 text-center pb-6">
-          本原型用于演示"历史回放、导出、执行单预览"与"可解释决策"的整合。生产落地建议由后端输出当日/历史决策对象，前端负责可视化与交互。
+          本原型用于演示&ldquo;历史回放、导出、执行单预览&rdquo;与&ldquo;可解释决策&rdquo;的整合。生产落地建议由后端输出当日/历史决策对象，前端负责可视化与交互。
         </div>
       </div>
     </div>

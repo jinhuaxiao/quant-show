@@ -9,7 +9,6 @@ import type { Factor } from '@/app/types/trading';
 
 interface FactorPoolProps {
   factors: Factor[];
-  currentStep: number;
   onSelectFactor: (factor: Factor) => void;
   onRejectFactor: (factor: Factor) => void;
 }
@@ -36,7 +35,7 @@ const getCategoryColor = (category: string) => {
   return colors[category as keyof typeof colors] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
 };
 
-export function FactorPool({ factors, currentStep, onSelectFactor, onRejectFactor }: FactorPoolProps) {
+export function FactorPool({ factors, onSelectFactor, onRejectFactor }: FactorPoolProps) {
   const pendingFactors = factors.filter(f => f.status === 'pending');
   const evaluatingFactors = factors.filter(f => f.status === 'evaluating');
   const selectedFactors = factors.filter(f => f.status === 'selected');

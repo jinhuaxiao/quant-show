@@ -22,7 +22,7 @@ const MetricCard = ({
   title: string;
   value: number;
   unit?: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
   trend?: 'up' | 'down' | 'neutral';
 }) => {

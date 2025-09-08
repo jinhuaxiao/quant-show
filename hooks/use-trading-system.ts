@@ -302,8 +302,7 @@ export const useTradingSystem = () => {
       addSearchPoint({
         x,
         y,
-        fitness,
-        algorithm: 'genetic'
+        fitness
       });
       
       setState(prev => ({ 

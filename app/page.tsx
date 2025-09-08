@@ -17,7 +17,7 @@ export default function MedallionAlgorithm() {
     s: 5,
   });
 
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isAnimating] = useState(false);
   const [activeAlgorithm, setActiveAlgorithm] = useState('genetic');
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 

@@ -8,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 
 // 组件导入
 import { ProcessFlowIndicator } from './components/ProcessFlowIndicator';
-import { SystemControls } from './components/SystemControls';
 import { FloatingControls } from './components/FloatingControls';
 import { FactorPool } from './components/FactorPool';
 import { CorrelationMatrix } from './components/CorrelationMatrix';
@@ -29,7 +28,7 @@ export default function TradingSystemPage() {
         title: "系统启动成功",
         description: "量化交易流程已开始执行",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "系统启动失败",
         description: "请检查系统状态后重试",
@@ -93,7 +92,6 @@ export default function TradingSystemPage() {
           <div className="lg:col-span-1">
             <FactorPool 
               factors={state.factors}
-              currentStep={state.currentStep}
               onSelectFactor={actions.selectFactor}
               onRejectFactor={actions.rejectFactor}
             />

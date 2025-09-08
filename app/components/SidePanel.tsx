@@ -1,19 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { X, Play, RotateCcw, BarChart3, Settings, ChevronLeft } from 'lucide-react';
+import { useState } from 'react';
+import { X, Play, RotateCcw, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+interface Parameters {
+  n: number;
+  k: number;
+  s: number;
+}
 
 interface SidePanelProps {
   isOpen: boolean;
   onClose: () => void;
   activeAlgorithm: string;
-  parameters: {
-    n: number;
-    k: number;
-    s: number;
-  };
-  onParametersChange: (params: Partial<typeof parameters>) => void;
+  parameters: Parameters;
+  onParametersChange: (params: Partial<Parameters>) => void;
   onAlgorithmChange: (algorithm: string) => void;
 }
 
