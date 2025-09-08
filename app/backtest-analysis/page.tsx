@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Calendar, DollarSign, Percent, AlertTriangle, Download, Play, Pause, RotateCcw } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 // 生成模拟回测数据
 const generateBacktestData = () => {
@@ -69,7 +69,7 @@ const calculateMetrics = (data: any[]) => {
 export default function BacktestAnalysisPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [backtestData, setBacktestData] = useState(generateBacktestData());
+  const [backtestData, setBacktestData] = useState(() => generateBacktestData());
   const [selectedPeriod, setSelectedPeriod] = useState('1Y');
   
   const metrics = calculateMetrics(backtestData);
@@ -126,15 +126,17 @@ export default function BacktestAnalysisPage() {
             {/* Period Selector */}
             <div className="flex items-center space-x-2">
               {['1M', '3M', '6M', '1Y'].map(period => (
-                <Button
+                <button
                   key={period}
-                  size="sm"
-                  variant={selectedPeriod === period ? "default" : "outline"}
                   onClick={() => setSelectedPeriod(period)}
-                  className={selectedPeriod === period ? "bg-blue-600 hover:bg-blue-700" : ""}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                    selectedPeriod === period 
+                      ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                      : "bg-gray-700/50 hover:bg-gray-600/50 text-gray-300"
+                  }`}
                 >
                   {period}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
@@ -142,66 +144,70 @@ export default function BacktestAnalysisPage() {
 
         {/* Control Panel */}
         <div className="mb-6">
-          <Card className="bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-blue-400 flex items-center justify-between">
+          <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700/50 rounded-xl p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-blue-400 flex items-center justify-between">
                 <span>回测控制面板</span>
                 <div className="flex items-center space-x-2">
-                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-400">
+                  <span className="px-2 py-1 text-xs bg-blue-500/20 text-blue-400 rounded">
                     2023-01-01 至 2023-12-31
-                  </Badge>
-                  <Badge variant="secondary" className="bg-green-500/20 text-green-400">
+                  </span>
+                  <span className="px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded">
                     365 交易日
-                  </Badge>
+                  </span>
                 </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col lg:flex-row items-center gap-4">
-                <div className="flex-1 w-full">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-gray-400">回测进度</span>
-                    <span className="text-sm font-medium">{progress}%</span>
-                  </div>
-                  <Progress value={progress} className="h-2" />
+              </h3>
+            </div>
+            <div className="flex flex-col lg:flex-row items-center gap-4">
+              <div className="flex-1 w-full">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-400">回测进度</span>
+                  <span className="text-sm font-medium">{progress}%</span>
                 </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <motion.div
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={runBacktest}
+                  disabled={isRunning}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  {isRunning ? (
+                    <>
+                      <Pause className="w-4 h-4 mr-2" />
+                      运行中...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4 mr-2" />
+                      开始回测
+                    </>
+                  )}
+                </button>
                 
-                <div className="flex items-center space-x-2">
-                  <Button
-                    onClick={runBacktest}
-                    disabled={isRunning}
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                  >
-                    {isRunning ? (
-                      <>
-                        <Pause className="w-4 h-4 mr-2" />
-                        运行中...
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-4 h-4 mr-2" />
-                        开始回测
-                      </>
-                    )}
-                  </Button>
-                  
-                  <Button
-                    onClick={resetBacktest}
-                    variant="outline"
-                    disabled={isRunning}
-                  >
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    重置
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    className="hidden lg:flex"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    导出报告
-                  </Button>
-                </div>
+                <button
+                  onClick={resetBacktest}
+                  disabled={isRunning}
+                  className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  重置
+                </button>
+                
+                <button
+                  className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50 text-white font-medium rounded-lg transition-all hidden lg:flex items-center"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  导出报告
+                </button>
               </div>
             </div>
           </div>
@@ -337,190 +343,186 @@ export default function BacktestAnalysisPage() {
           {/* Portfolio Value Chart */}
           <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700/50 rounded-xl p-6">
             <h3 className="text-lg font-bold text-blue-400 mb-4">资产净值曲线</h3>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={backtestData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis 
-                      dataKey="date" 
-                      stroke="#9CA3AF"
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => {
-                        const date = new Date(value);
-                        return `${date.getMonth() + 1}/${date.getDate()}`;
-                      }}
-                    />
-                    <YAxis 
-                      stroke="#9CA3AF"
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => `¥${(value / 1000000).toFixed(1)}M`}
-                    />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
-                      labelStyle={{ color: '#9CA3AF' }}
-                      formatter={(value: any) => [`¥${(value / 1000).toFixed(0)}K`, '']}
-                    />
-                    <Legend />
-                    <Area 
-                      type="monotone" 
-                      dataKey="portfolio" 
-                      stroke="#3B82F6" 
-                      fill="#3B82F6" 
-                      fillOpacity={0.3}
-                      name="策略净值"
-                      strokeWidth={2}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="benchmark" 
-                      stroke="#F59E0B" 
-                      fill="#F59E0B" 
-                      fillOpacity={0.1}
-                      name="基准净值"
-                      strokeWidth={1}
-                      strokeDasharray="5 5"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={backtestData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="#9CA3AF"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}/${date.getDate()}`;
+                    }}
+                  />
+                  <YAxis 
+                    stroke="#9CA3AF"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => `¥${(value / 1000000).toFixed(1)}M`}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
+                    labelStyle={{ color: '#9CA3AF' }}
+                    formatter={(value: any) => [`¥${(value / 1000).toFixed(0)}K`, '']}
+                  />
+                  <Legend />
+                  <Area 
+                    type="monotone" 
+                    dataKey="portfolio" 
+                    stroke="#3B82F6" 
+                    fill="#3B82F6" 
+                    fillOpacity={0.3}
+                    name="策略净值"
+                    strokeWidth={2}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="benchmark" 
+                    stroke="#F59E0B" 
+                    fill="#F59E0B" 
+                    fillOpacity={0.1}
+                    name="基准净值"
+                    strokeWidth={1}
+                    strokeDasharray="5 5"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
           {/* Daily Returns Distribution */}
           <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700/50 rounded-xl p-6">
             <h3 className="text-lg font-bold text-blue-400 mb-4">每日收益分布</h3>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={backtestData.slice(-30)}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis 
-                      dataKey="date" 
-                      stroke="#9CA3AF"
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => {
-                        const date = new Date(value);
-                        return `${date.getMonth() + 1}/${date.getDate()}`;
-                      }}
-                    />
-                    <YAxis 
-                      stroke="#9CA3AF"
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => `${value}%`}
-                    />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
-                      labelStyle={{ color: '#9CA3AF' }}
-                      formatter={(value: any) => [`${value.toFixed(2)}%`, '日收益']}
-                    />
-                    <ReferenceLine y={0} stroke="#6B7280" />
-                    <Bar 
-                      dataKey="dailyReturn" 
-                      name="日收益率"
-                      fill={(data: any) => data.dailyReturn > 0 ? '#10B981' : '#EF4444'}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={backtestData.slice(-30)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="#9CA3AF"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}/${date.getDate()}`;
+                    }}
+                  />
+                  <YAxis 
+                    stroke="#9CA3AF"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
+                    labelStyle={{ color: '#9CA3AF' }}
+                    formatter={(value: any) => [`${value.toFixed(2)}%`, '日收益']}
+                  />
+                  <ReferenceLine y={0} stroke="#6B7280" />
+                  <Bar 
+                    dataKey="dailyReturn" 
+                    name="日收益率"
+                    fill={(data: any) => data.dailyReturn > 0 ? '#10B981' : '#EF4444'}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
           {/* Drawdown Chart */}
           <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700/50 rounded-xl p-6">
             <h3 className="text-lg font-bold text-blue-400 mb-4">回撤分析</h3>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={backtestData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis 
-                      dataKey="date" 
-                      stroke="#9CA3AF"
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => {
-                        const date = new Date(value);
-                        return `${date.getMonth() + 1}/${date.getDate()}`;
-                      }}
-                    />
-                    <YAxis 
-                      stroke="#9CA3AF"
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => `${value}%`}
-                    />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
-                      labelStyle={{ color: '#9CA3AF' }}
-                      formatter={(value: any) => [`${value.toFixed(2)}%`, '回撤']}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="drawdown" 
-                      stroke="#EF4444" 
-                      fill="#EF4444" 
-                      fillOpacity={0.3}
-                      name="回撤"
-                      strokeWidth={2}
-                    />
-                    <ReferenceLine y={-5} stroke="#F59E0B" strokeDasharray="5 5" label="5% 警戒线" />
-                    <ReferenceLine y={-10} stroke="#EF4444" strokeDasharray="5 5" label="10% 止损线" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={backtestData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="#9CA3AF"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}/${date.getDate()}`;
+                    }}
+                  />
+                  <YAxis 
+                    stroke="#9CA3AF"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
+                    labelStyle={{ color: '#9CA3AF' }}
+                    formatter={(value: any) => [`${value.toFixed(2)}%`, '回撤']}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="drawdown" 
+                    stroke="#EF4444" 
+                    fill="#EF4444" 
+                    fillOpacity={0.3}
+                    name="回撤"
+                    strokeWidth={2}
+                  />
+                  <ReferenceLine y={-5} stroke="#F59E0B" strokeDasharray="5 5" label="5% 警戒线" />
+                  <ReferenceLine y={-10} stroke="#EF4444" strokeDasharray="5 5" label="10% 止损线" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
           {/* Trading Volume */}
           <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700/50 rounded-xl p-6">
             <h3 className="text-lg font-bold text-blue-400 mb-4">交易量分析</h3>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={backtestData.slice(-30)}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis 
-                      dataKey="date" 
-                      stroke="#9CA3AF"
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => {
-                        const date = new Date(value);
-                        return `${date.getMonth() + 1}/${date.getDate()}`;
-                      }}
-                    />
-                    <YAxis 
-                      yAxisId="left"
-                      stroke="#9CA3AF"
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
-                    />
-                    <YAxis 
-                      yAxisId="right"
-                      orientation="right"
-                      stroke="#9CA3AF"
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
-                      labelStyle={{ color: '#9CA3AF' }}
-                    />
-                    <Legend />
-                    <Line 
-                      yAxisId="left"
-                      type="monotone" 
-                      dataKey="volume" 
-                      stroke="#8B5CF6" 
-                      name="交易量"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                    <Line 
-                      yAxisId="right"
-                      type="monotone" 
-                      dataKey="trades" 
-                      stroke="#10B981" 
-                      name="交易次数"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={backtestData.slice(-30)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="#9CA3AF"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}/${date.getDate()}`;
+                    }}
+                  />
+                  <YAxis 
+                    yAxisId="left"
+                    stroke="#9CA3AF"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
+                  />
+                  <YAxis 
+                    yAxisId="right"
+                    orientation="right"
+                    stroke="#9CA3AF"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151' }}
+                    labelStyle={{ color: '#9CA3AF' }}
+                  />
+                  <Legend />
+                  <Line 
+                    yAxisId="left"
+                    type="monotone" 
+                    dataKey="volume" 
+                    stroke="#8B5CF6" 
+                    name="交易量"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line 
+                    yAxisId="right"
+                    type="monotone" 
+                    dataKey="trades" 
+                    stroke="#10B981" 
+                    name="交易次数"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
@@ -531,90 +533,88 @@ export default function BacktestAnalysisPage() {
             <AlertTriangle className="w-5 h-5" />
             <span>风险分析报告</span>
           </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-400">风险等级评估</h4>
-                <div className="flex items-center space-x-2">
-                  <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full w-3/4 bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 rounded-full" />
-                  </div>
-                  <span className="text-sm font-bold text-yellow-400">中高</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-gray-400">风险等级评估</h4>
+              <div className="flex items-center space-x-2">
+                <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div className="h-full w-3/4 bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 rounded-full" />
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-400">VAR (95%)</h4>
-                <div className="text-2xl font-bold text-orange-400">-2.8%</div>
-                <p className="text-xs text-gray-500">日风险价值</p>
-              </div>
-              
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-400">最长连亏</h4>
-                <div className="text-2xl font-bold text-red-400">7天</div>
-                <p className="text-xs text-gray-500">历史最长连续亏损</p>
-              </div>
-              
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-400">盈亏比</h4>
-                <div className="text-2xl font-bold text-green-400">1.8:1</div>
-                <p className="text-xs text-gray-500">平均盈利/平均亏损</p>
+                <span className="text-sm font-bold text-yellow-400">中高</span>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-gray-400">VAR (95%)</h4>
+              <div className="text-2xl font-bold text-orange-400">-2.8%</div>
+              <p className="text-xs text-gray-500">日风险价值</p>
+            </div>
+            
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-gray-400">最长连亏</h4>
+              <div className="text-2xl font-bold text-red-400">7天</div>
+              <p className="text-xs text-gray-500">历史最长连续亏损</p>
+            </div>
+            
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-gray-400">盈亏比</h4>
+              <div className="text-2xl font-bold text-green-400">1.8:1</div>
+              <p className="text-xs text-gray-500">平均盈利/平均亏损</p>
+            </div>
+          </div>
+        </div>
 
         {/* Strategy Summary */}
         <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700/50 rounded-xl p-6">
           <h3 className="text-lg font-bold text-blue-400 mb-4">策略回测总结</h3>
-            <div className="prose prose-invert max-w-none">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="text-green-400 mb-3">策略优势</h4>
-                  <ul className="space-y-2 text-sm text-gray-300">
-                    <li className="flex items-start">
-                      <span className="text-green-400 mr-2">✓</span>
-                      年化收益率超过基准15个百分点
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-400 mr-2">✓</span>
-                      夏普比率达到2.0以上，风险调整后收益优秀
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-400 mr-2">✓</span>
-                      最大回撤控制在10%以内，风险可控
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-400 mr-2">✓</span>
-                      胜率稳定在55%以上，具有统计优势
-                    </li>
-                  </ul>
-                </div>
-                
-                <div>
-                  <h4 className="text-yellow-400 mb-3">改进建议</h4>
-                  <ul className="space-y-2 text-sm text-gray-300">
-                    <li className="flex items-start">
-                      <span className="text-yellow-400 mr-2">!</span>
-                      考虑加入动态止损机制，进一步降低回撤
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-yellow-400 mr-2">!</span>
-                      优化仓位管理，在高波动期降低杠杆
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-yellow-400 mr-2">!</span>
-                      增加市场状态识别，适应不同市场环境
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-yellow-400 mr-2">!</span>
-                      考虑交易成本和滑点的影响
-                    </li>
-                  </ul>
-                </div>
+          <div className="prose prose-invert max-w-none">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <h4 className="text-green-400 mb-3">策略优势</h4>
+                <ul className="space-y-2 text-sm text-gray-300">
+                  <li className="flex items-start">
+                    <span className="text-green-400 mr-2">✓</span>
+                    年化收益率超过基准15个百分点
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-400 mr-2">✓</span>
+                    夏普比率达到2.0以上，风险调整后收益优秀
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-400 mr-2">✓</span>
+                    最大回撤控制在10%以内，风险可控
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-400 mr-2">✓</span>
+                    胜率稳定在55%以上，具有统计优势
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="text-yellow-400 mb-3">改进建议</h4>
+                <ul className="space-y-2 text-sm text-gray-300">
+                  <li className="flex items-start">
+                    <span className="text-yellow-400 mr-2">!</span>
+                    考虑加入动态止损机制，进一步降低回撤
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-yellow-400 mr-2">!</span>
+                    优化仓位管理，在高波动期降低杠杆
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-yellow-400 mr-2">!</span>
+                    增加市场状态识别，适应不同市场环境
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-yellow-400 mr-2">!</span>
+                    考虑交易成本和滑点的影响
+                  </li>
+                </ul>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
