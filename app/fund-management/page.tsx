@@ -514,9 +514,9 @@ export default function FundManagementPage() {
                   name="实际波动"
                   stroke="#3B82F6"
                   dot={(p: any) => {
-                    const { cx, cy, payload } = p;
+                    const { cx, cy, payload, index } = p;
                     const color = payload.decision > 0 ? "#10b981" : payload.decision < 0 ? "#ef4444" : "#94a3b8";
-                    return <circle cx={cx} cy={cy} r={4} fill={color} stroke="#fff" strokeWidth={1} />;
+                    return <circle key={`dot-${index}`} cx={cx} cy={cy} r={4} fill={color} stroke="#fff" strokeWidth={1} />;
                   }}
                 />
               </LineChart>
