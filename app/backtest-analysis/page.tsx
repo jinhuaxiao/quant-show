@@ -6,7 +6,13 @@ import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Calendar, Dol
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
 import { motion } from 'framer-motion';
 
-// 生成模拟回测数据
+// 使用固定种子的伪随机数生成器
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+};
+
+// 生成模拟回测数据（使用固定种子避免hydration问题）
 const generateBacktestData = () => {
   const data = [];
   let portfolio = 1000000; // 初始资金 100万
@@ -17,12 +23,12 @@ const generateBacktestData = () => {
     const date = new Date(startDate);
     date.setDate(date.getDate() + i);
     
-    // 策略收益（更高的波动和收益）
-    const dailyReturn = (Math.random() - 0.48) * 0.03; // -1.44% 到 +1.56% 日收益
+    // 策略收益（使用固定种子）
+    const dailyReturn = (seededRandom(i * 7 + 1) - 0.48) * 0.03; // -1.44% 到 +1.56% 日收益
     portfolio = portfolio * (1 + dailyReturn);
     
-    // 基准收益（较低的波动）
-    const benchmarkReturn = (Math.random() - 0.49) * 0.015; // -0.735% 到 +0.765% 日收益
+    // 基准收益（使用固定种子）
+    const benchmarkReturn = (seededRandom(i * 13 + 3) - 0.49) * 0.015; // -0.735% 到 +0.765% 日收益
     benchmark = benchmark * (1 + benchmarkReturn);
     
     // 计算回撤
@@ -34,8 +40,8 @@ const generateBacktestData = () => {
       benchmark: Math.round(benchmark),
       dailyReturn: dailyReturn * 100,
       drawdown: drawdown,
-      volume: Math.floor(Math.random() * 1000000) + 500000,
-      trades: Math.floor(Math.random() * 50) + 10
+      volume: Math.floor(seededRandom(i * 17 + 5) * 1000000) + 500000,
+      trades: Math.floor(seededRandom(i * 23 + 7) * 50) + 10
     });
   }
   
@@ -66,13 +72,15 @@ const calculateMetrics = (data: any[]) => {
   };
 };
 
+// 预生成固定的初始数据
+const initialBacktestData = generateBacktestData();
+
 export default function BacktestAnalysisPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [backtestData, setBacktestData] = useState(() => generateBacktestData());
+  const [backtestData, setBacktestData] = useState(initialBacktestData);
   const [selectedPeriod, setSelectedPeriod] = useState('1Y');
-  
-  const metrics = calculateMetrics(backtestData);
+  const [metrics, setMetrics] = useState(() => calculateMetrics(initialBacktestData));
 
   const runBacktest = () => {
     setIsRunning(true);
@@ -84,7 +92,9 @@ export default function BacktestAnalysisPage() {
         if (prev >= 100) {
           clearInterval(interval);
           setIsRunning(false);
-          setBacktestData(generateBacktestData());
+          const newData = generateBacktestData();
+          setBacktestData(newData);
+          setMetrics(calculateMetrics(newData));
           return 100;
         }
         return prev + 5;
@@ -95,7 +105,9 @@ export default function BacktestAnalysisPage() {
   const resetBacktest = () => {
     setProgress(0);
     setIsRunning(false);
-    setBacktestData(generateBacktestData());
+    const newData = generateBacktestData();
+    setBacktestData(newData);
+    setMetrics(calculateMetrics(newData));
   };
 
   return (
