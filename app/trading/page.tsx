@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 // 组件导入
 import { ProcessFlowIndicator } from './components/ProcessFlowIndicator';
 import { SystemControls } from './components/SystemControls';
+import { FloatingControls } from './components/FloatingControls';
 import { FactorPool } from './components/FactorPool';
 import { CorrelationMatrix } from './components/CorrelationMatrix';
 import { OptimizationCanvas } from './components/OptimizationCanvas';
@@ -146,27 +147,23 @@ export default function TradingSystemPage() {
           currentStep={state.currentStep}
         />
 
-        {/* System Controls and Logs */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6 mt-6">
-          {/* System Controls */}
-          <div className="lg:col-span-1">
-            <SystemControls 
-              isRunning={state.isRunning}
-              isPaused={state.isPaused}
-              progress={state.progress}
-              onStart={handleStartSystem}
-              onPause={handlePauseSystem}
-              onReset={handleResetSystem}
-            />
-          </div>
-
-          {/* System Logs */}
-          <div className="lg:col-span-2">
-            <SystemLogs 
-              logs={state.logs}
-            />
-          </div>
+        {/* System Logs - Full Width */}
+        <div className="mt-6">
+          <SystemLogs 
+            logs={state.logs}
+          />
         </div>
+        
+        {/* Floating Controls Panel */}
+        <FloatingControls 
+          isRunning={state.isRunning}
+          isPaused={state.isPaused}
+          progress={state.progress}
+          currentStep={state.currentStep}
+          onStart={handleStartSystem}
+          onPause={handlePauseSystem}
+          onReset={handleResetSystem}
+        />
       </div>
     </div>
   );

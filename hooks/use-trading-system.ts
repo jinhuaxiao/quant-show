@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { Factor, Stock, TradingSystemState, LogEntry, SearchPoint } from '@/app/types/trading';
+import type { Factor, Stock, TradingSystemState, LogEntry, SearchPoint, ConvergencePoint } from '@/app/types/trading';
 import { generateId } from '@/lib/utils';
 
 // 初始状态
@@ -78,7 +78,7 @@ const generateStocks = (): Stock[] => {
   };
 
   const stocks: Stock[] = [];
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < Math.min(50, tickers.length); i++) {
     stocks.push({
       id: `stock-${i}`, // 使用固定ID避免随机生成
       ticker: tickers[i],
@@ -119,11 +119,8 @@ export const useTradingSystem = () => {
     }));
   }, []);
 
-  // 启动系统
-  const startSystem = useCallback(async () => {
-    setState(prev => ({ ...prev, isRunning: true, isPaused: false, currentStep: 1, progress: 0 }));
-    addLog('===== 开始量化交易流程 =====', 'info', true);
-  }, [addLog]);
+  // 延迟函数
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   // 暂停系统
   const pauseSystem = useCallback(() => {
@@ -227,6 +224,190 @@ export const useTradingSystem = () => {
       performance: { ...prev.performance, ...metrics }
     }));
   }, []);
+
+  // 启动系统  
+  const startSystem = useCallback(async () => {
+    setState(prev => ({ ...prev, isRunning: true, isPaused: false, currentStep: 1, progress: 0 }));
+    addLog('===== 开始量化交易流程 =====', 'info', true);
+    
+    // 自动执行流程
+    setTimeout(() => executeAutomatedFlow(), 100);
+  }, [addLog]);
+
+  // 自动化流程执行
+  const executeAutomatedFlow = async () => {
+    // Step 1: 因子筛选
+    setState(prev => ({ ...prev, currentStep: 1, progress: 0 }));
+    addLog('【步骤1】开始因子筛选...', 'info', true);
+    
+    // 模拟因子筛选过程
+    const factors = state.factors;
+    for (let i = 0; i < Math.min(20, factors.length); i++) {
+      await delay(200);
+      const factor = factors[i];
+      const isGood = factor.ic > 0.02 || factor.ir > 1.5;
+      
+      if (isGood && state.selectedFactors.length < 10) {
+        selectFactor(factor);
+        setState(prev => ({ 
+          ...prev, 
+          progress: Math.min(((i + 1) / 20) * 100, 100)
+        }));
+      } else {
+        rejectFactor(factor);
+      }
+    }
+    
+    await delay(500);
+    addLog(`✓ 因子筛选完成，选中 ${state.selectedFactors.length} 个因子`, 'success');
+    
+    // Step 2: 相关性过滤
+    setState(prev => ({ ...prev, currentStep: 2, progress: 0 }));
+    addLog('【步骤2】开始相关性过滤...', 'info', true);
+    
+    // 生成相关性矩阵
+    const correlationMatrix: number[][] = [];
+    const selectedFactors = state.selectedFactors;
+    for (let i = 0; i < selectedFactors.length; i++) {
+      correlationMatrix[i] = [];
+      for (let j = 0; j < selectedFactors.length; j++) {
+        await delay(50);
+        const seed = (i * selectedFactors.length + j) * 1337;
+        correlationMatrix[i][j] = i === j ? 1 : (seed % 1000) / 1000 - 0.5;
+        setState(prev => ({ 
+          ...prev, 
+          correlationMatrix,
+          progress: Math.min(((i * selectedFactors.length + j + 1) / (selectedFactors.length * selectedFactors.length)) * 100, 100)
+        }));
+      }
+    }
+    
+    await delay(500);
+    addLog('✓ 相关性过滤完成，低相关因子已保留', 'success');
+    
+    // Step 3: 权重优化
+    setState(prev => ({ ...prev, currentStep: 3, progress: 0, iteration: 0 }));
+    addLog('【步骤3】开始权重优化...', 'info', true);
+    
+    // 模拟优化过程
+    const maxIterations = 50;
+    for (let iter = 0; iter < maxIterations; iter++) {
+      await delay(100);
+      
+      // 添加搜索点
+      const x = (iter % 10) * 10;
+      const y = Math.floor(iter / 10) * 20;
+      const fitness = 0.5 + (iter / maxIterations) * 0.4 + (Math.sin(iter * 0.5) * 0.1);
+      
+      addSearchPoint({
+        x,
+        y,
+        fitness,
+        algorithm: 'genetic'
+      });
+      
+      setState(prev => ({ 
+        ...prev, 
+        iteration: iter + 1,
+        progress: Math.min(((iter + 1) / maxIterations) * 100, 100)
+      }));
+      
+      if (iter % 10 === 0) {
+        addLog(`优化进度: ${iter + 1}/${maxIterations} 迭代`, 'info');
+      }
+    }
+    
+    await delay(500);
+    addLog('✓ 权重优化完成，找到最优权重组合', 'success');
+    
+    // Step 4: 收敛判断
+    setState(prev => ({ ...prev, currentStep: 4, progress: 0 }));
+    addLog('【步骤4】检查收敛性...', 'info', true);
+    
+    // 生成收敛曲线
+    const convergenceHistory: ConvergencePoint[] = [];
+    for (let i = 0; i < 30; i++) {
+      await delay(50);
+      const fitness = 0.3 + (1 - Math.exp(-i * 0.2)) * 0.6 + (Math.sin(i * 0.5) * 0.05);
+      convergenceHistory.push({
+        iteration: i + 1,
+        fitness,
+        timestamp: Date.now()
+      });
+      setState(prev => ({ 
+        ...prev, 
+        convergenceHistory,
+        progress: Math.min(((i + 1) / 30) * 100, 100)
+      }));
+    }
+    
+    await delay(500);
+    addLog('✓ 收敛判断完成，模型已收敛', 'success');
+    
+    // Step 5: 股票选择
+    setState(prev => ({ ...prev, currentStep: 5, progress: 0 }));
+    addLog('【步骤5】开始股票选择...', 'info', true);
+    
+    // 计算股票得分并选择
+    const stocks = state.stocks.map((stock, index) => ({
+      ...stock,
+      score: 50 + (Math.sin(index * 0.7) * 40)
+    }));
+    
+    // 排序并选择前20只
+    const sortedStocks = [...stocks].sort((a, b) => b.score - a.score);
+    for (let i = 0; i < Math.min(20, sortedStocks.length); i++) {
+      await delay(150);
+      const stock = sortedStocks[i];
+      selectStock(stock);
+      setState(prev => ({ 
+        ...prev,
+        progress: Math.min(((i + 1) / 20) * 100, 100)
+      }));
+    }
+    
+    await delay(500);
+    addLog(`✓ 股票选择完成，选中 ${state.selectedStocks.length} 只股票`, 'success');
+    
+    // Step 6: 交易执行
+    setState(prev => ({ ...prev, currentStep: 6, progress: 0 }));
+    addLog('【步骤6】开始交易执行...', 'info', true);
+    
+    // 模拟交易执行
+    for (let i = 0; i <= 10; i++) {
+      await delay(200);
+      setState(prev => ({ 
+        ...prev,
+        progress: Math.min((i / 10) * 100, 100)
+      }));
+      
+      if (i % 3 === 0) {
+        addLog(`执行交易订单 ${i + 1}/10...`, 'info');
+      }
+    }
+    
+    // 更新性能指标
+    updatePerformance({
+      totalReturn: 12.5,
+      annualizedReturn: 25.3,
+      sharpeRatio: 2.1,
+      maxDrawdown: -5.2,
+      winRate: 65.8,
+      volatility: 12.1
+    });
+    
+    await delay(500);
+    addLog('✓ 交易执行完成，持仓已更新', 'success');
+    addLog('===== 量化交易流程完成 =====', 'info', true);
+    
+    // 完成
+    setState(prev => ({ 
+      ...prev, 
+      isRunning: false,
+      currentStep: 7,
+      progress: 100
+    }));
+  };
 
   return {
     state,

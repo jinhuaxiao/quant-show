@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -44,12 +44,7 @@ const getLogBadgeColor = (type: LogEntry['type']) => {
 };
 
 export function SystemLogs({ logs, onClearLogs }: SystemLogsProps) {
-  const logsEndRef = useRef<HTMLDivElement>(null);
-  
-  // 自动滚动到最新日志
-  useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
+  // 移除自动滚动功能，避免影响用户操作
 
   const formatTime = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString('zh-CN', {
@@ -165,9 +160,6 @@ export function SystemLogs({ logs, onClearLogs }: SystemLogsProps) {
                 </motion.div>
               ))}
             </AnimatePresence>
-            
-            {/* 滚动锚点 */}
-            <div ref={logsEndRef} />
           </div>
         )}
         
@@ -176,7 +168,6 @@ export function SystemLogs({ logs, onClearLogs }: SystemLogsProps) {
           <div className="mt-4 pt-4 border-t border-border">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <div className="flex items-center space-x-4">
-                <span>日志自动滚动到最新</span>
                 <span>最多保留100条记录</span>
               </div>
               <div className="flex items-center space-x-1">
