@@ -15,7 +15,9 @@ export function CorrelationHeatmap() {
     
     // Generate 15x15 grid (225 cells) with correlation data
     for (let i = 0; i < 225; i++) {
-      const correlation = Math.random();
+      // Use deterministic pseudo-random based on index
+      const seed = i * 2654435761 % 2147483647;
+      const correlation = (seed % 1000) / 1000;
       let color: string;
       
       // Determine color based on correlation strength

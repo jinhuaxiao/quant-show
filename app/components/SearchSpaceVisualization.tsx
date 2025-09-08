@@ -80,9 +80,13 @@ export function SearchSpaceVisualization({ isAnimating, parameters }: SearchSpac
         const baseX = 50 + radius * Math.cos(angle);
         const baseY = 50 + radius * Math.sin(angle);
         
-        // Add some randomness
-        const x = Math.max(5, Math.min(95, baseX + (Math.random() - 0.5) * 10));
-        const y = Math.max(5, Math.min(95, baseY + (Math.random() - 0.5) * 10));
+        // Add some deterministic variation based on iteration
+        const seed1 = (iteration * 2654435761) % 2147483647;
+        const seed2 = ((iteration + 1000) * 2654435761) % 2147483647;
+        const randX = ((seed1 % 1000) / 1000 - 0.5) * 10;
+        const randY = ((seed2 % 1000) / 1000 - 0.5) * 10;
+        const x = Math.max(5, Math.min(95, baseX + randX));
+        const y = Math.max(5, Math.min(95, baseY + randY));
 
         if (iteration < newNodes.length) {
           newNodes[iteration] = {
