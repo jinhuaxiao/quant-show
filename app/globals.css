@@ -115,3 +115,61 @@ body {
 .border-border {
   border-color: hsl(217 32% 30%) !important;
 }
+
+/* 强制文字颜色清晰 - 针对深色主题优化 */
+* {
+  color-scheme: dark;
+}
+
+/* 标题和重要文字 */
+h1, h2, h3, h4, h5, h6 {
+  color: hsl(0 0% 95%) !important;
+}
+
+/* 通用文字颜色增强 */
+span, div, p, label {
+  color: inherit;
+}
+
+/* 确保所有白色/浅色文字在深色背景上清晰显示 */
+.text-white {
+  color: hsl(0 0% 98%) !important;
+}
+
+.text-gray-200 {
+  color: hsl(0 0% 90%) !important;
+}
+
+.text-gray-300 {
+  color: hsl(0 0% 85%) !important;
+}
+
+.text-gray-400 {
+  color: hsl(0 0% 75%) !important;
+}
+
+/* 小文字增强对比度 */
+.text-xs {
+  color: hsl(0 0% 80%) !important;
+}
+
+.text-sm {
+  color: hsl(0 0% 85%) !important;
+}
+
+/* 卡片内容文字 */
+.rounded-xl .p-6 {
+  color: hsl(0 0% 95%) !important;
+}
+
+/* 特殊情况：确保按钮文字清晰 */
+button {
+  color: inherit !important;
+}
+
+/* 输入框和表单元素 */
+input, select, textarea {
+  background-color: hsl(217 32% 15%) !important;
+  color: hsl(0 0% 95%) !important;
+  border-color: hsl(217 32% 30%) !important;
+}
