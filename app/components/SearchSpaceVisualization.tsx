@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { Play, RotateCcw } from 'lucide-react';
 
 interface SearchSpaceVisualizationProps {
-  isAnimating: boolean;
+  isAnimating?: boolean;
   parameters: {
     n: number;
     k: number;
@@ -19,9 +20,14 @@ interface SearchNode {
   opacity: number;
 }
 
-export function SearchSpaceVisualization({ isAnimating, parameters }: SearchSpaceVisualizationProps) {
+export function SearchSpaceVisualization({ isAnimating: externalAnimating, parameters }: SearchSpaceVisualizationProps) {
   const [bruteForceNodes, setBruteForceNodes] = useState<SearchNode[]>([]);
   const [geneticNodes, setGeneticNodes] = useState<SearchNode[]>([]);
+  const [internalAnimating, setInternalAnimating] = useState(false);
+  const animationRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Use either external or internal animation state
+  const isAnimating = externalAnimating ?? internalAnimating;
 
   // Initialize brute force visualization (dense grid)
   useEffect(() => {
@@ -40,96 +46,137 @@ export function SearchSpaceVisualization({ isAnimating, parameters }: SearchSpac
     setBruteForceNodes(nodes);
   }, []);
 
-  // Initialize genetic algorithm visualization
-  useEffect(() => {
+  // Initialize genetic algorithm visualization with spiral pattern
+  const initializeGeneticNodes = () => {
     const nodes: SearchNode[] = [];
-    for (let i = 0; i < 50; i++) {
-      const angle = (i / 50) * Math.PI * 2;
-      const radius = 40 - i * 0.7;
-      const x = 50 + radius * Math.cos(angle);
-      const y = 50 + radius * Math.sin(angle);
+    // Create initial scattered points
+    for (let i = 0; i < 30; i++) {
+      const seed = i * 2654435761 % 2147483647;
+      const x = ((seed % 1000) / 1000) * 90 + 5;
+      const y = (((seed * 7) % 1000) / 1000) * 90 + 5;
       
       nodes.push({
         id: `genetic-${i}`,
-        x: Math.max(5, Math.min(95, x)),
-        y: Math.max(5, Math.min(95, y)),
-        type: i < 10 ? 'explored' : i < 40 ? 'evaluating' : 'optimal',
-        opacity: i < 10 ? 0.3 : 1
+        x,
+        y,
+        type: 'explored',
+        opacity: 0.1
       });
     }
     setGeneticNodes(nodes);
+  };
+
+  useEffect(() => {
+    initializeGeneticNodes();
   }, []);
 
-  // Animate genetic algorithm search
-  useEffect(() => {
-    if (!isAnimating) return;
-
+  // Start animation
+  const startAnimation = () => {
+    setInternalAnimating(true);
+    initializeGeneticNodes();
+    
     let iteration = 0;
-    const interval = setInterval(() => {
-      if (iteration >= 50) {
-        clearInterval(interval);
+    const totalIterations = 50;
+    const centerX = 50;
+    const centerY = 50;
+    
+    const animate = () => {
+      if (iteration >= totalIterations) {
+        setInternalAnimating(false);
         return;
       }
 
       setGeneticNodes(prev => {
         const newNodes = [...prev];
         
-        // Add new search point
-        const angle = (iteration / 50) * Math.PI * 2;
-        const radius = 40 - iteration * 0.7;
-        const baseX = 50 + radius * Math.cos(angle);
-        const baseY = 50 + radius * Math.sin(angle);
+        // Spiral convergence pattern
+        const progress = iteration / totalIterations;
+        const angle = progress * Math.PI * 4; // Multiple rotations
+        const radius = (1 - progress) * 40; // Decreasing radius
         
-        // Add some deterministic variation based on iteration
+        // Add some variation
         const seed1 = (iteration * 2654435761) % 2147483647;
         const seed2 = ((iteration + 1000) * 2654435761) % 2147483647;
-        const randX = ((seed1 % 1000) / 1000 - 0.5) * 10;
-        const randY = ((seed2 % 1000) / 1000 - 0.5) * 10;
-        const x = Math.max(5, Math.min(95, baseX + randX));
-        const y = Math.max(5, Math.min(95, baseY + randY));
-
-        if (iteration < newNodes.length) {
-          newNodes[iteration] = {
-            ...newNodes[iteration],
-            x,
-            y,
-            type: iteration < 20 ? 'evaluating' : 'optimal',
-            opacity: 1
-          };
-        }
-
-        // Fade older nodes
+        const variation = 5 * (1 - progress); // Less variation as we converge
+        const randX = ((seed1 % 1000) / 1000 - 0.5) * variation;
+        const randY = ((seed2 % 1000) / 1000 - 0.5) * variation;
+        
+        const x = centerX + radius * Math.cos(angle) + randX;
+        const y = centerY + radius * Math.sin(angle) + randY;
+        
+        // Add new node or update existing
+        const nodeIndex = iteration % newNodes.length;
+        newNodes[nodeIndex] = {
+          id: `genetic-${nodeIndex}`,
+          x: Math.max(5, Math.min(95, x)),
+          y: Math.max(5, Math.min(95, y)),
+          type: progress > 0.8 ? 'optimal' : progress > 0.4 ? 'evaluating' : 'explored',
+          opacity: progress > 0.8 ? 1 : progress > 0.4 ? 0.7 : 0.3
+        };
+        
+        // Update other nodes based on progress
         newNodes.forEach((node, index) => {
-          if (index < iteration - 10) {
-            node.type = 'explored';
-            node.opacity = 0.2;
+          if (index !== nodeIndex) {
+            // Gradually converge all nodes toward center
+            const convergeRate = 0.05 * progress;
+            node.x = node.x + (centerX - node.x) * convergeRate;
+            node.y = node.y + (centerY - node.y) * convergeRate;
+            
+            // Update opacity based on distance from center
+            const distance = Math.sqrt(Math.pow(node.x - centerX, 2) + Math.pow(node.y - centerY, 2));
+            if (distance < 10 && progress > 0.7) {
+              node.type = 'optimal';
+              node.opacity = 1;
+            } else if (distance < 20 && progress > 0.4) {
+              node.type = 'evaluating';
+              node.opacity = 0.7;
+            }
           }
         });
-
+        
         return newNodes;
       });
 
       iteration++;
-    }, 100);
+      animationRef.current = setTimeout(animate, 100);
+    };
 
-    return () => clearInterval(interval);
-  }, [isAnimating]);
+    animate();
+  };
+
+  // Reset animation
+  const resetAnimation = () => {
+    setInternalAnimating(false);
+    if (animationRef.current) {
+      clearTimeout(animationRef.current);
+    }
+    initializeGeneticNodes();
+  };
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        clearTimeout(animationRef.current);
+      }
+    };
+  }, []);
 
   const renderNodes = (nodes: SearchNode[]) => (
     <div className="absolute inset-0">
       {nodes.map((node) => (
         <div
           key={node.id}
-          className={`absolute w-1 h-1 rounded-full transition-all duration-500 ${
-            node.type === 'explored' ? 'bg-gray-500' :
-            node.type === 'evaluating' ? 'bg-yellow-400 shadow-lg shadow-yellow-400/50 animate-evaluating' :
-            'bg-green-400 shadow-lg shadow-green-400/50 w-2 h-2'
+          className={`absolute rounded-full transition-all duration-500 ${
+            node.type === 'explored' ? 'bg-gray-500 w-1 h-1' :
+            node.type === 'evaluating' ? 'bg-yellow-400 shadow-lg shadow-yellow-400/50 w-1.5 h-1.5 animate-pulse' :
+            'bg-green-400 shadow-lg shadow-green-400/50 w-2 h-2 animate-pulse'
           }`}
           style={{
             left: `${node.x}%`,
             top: `${node.y}%`,
             opacity: node.opacity,
-            transform: node.type === 'optimal' ? 'translate(-50%, -50%)' : 'translate(-50%, -50%)'
+            transform: 'translate(-50%, -50%)'
           }}
         />
       ))}
@@ -172,19 +219,30 @@ export function SearchSpaceVisualization({ isAnimating, parameters }: SearchSpac
           <div className="relative w-full h-64 lg:h-72 bg-gradient-radial from-blue-400/10 to-transparent rounded-lg overflow-hidden">
             {renderNodes(geneticNodes)}
             
+            {/* Convergence indicator */}
+            {isAnimating && (
+              <div className="absolute top-2 right-2 text-xs text-green-400 animate-pulse">
+                收敛中...
+              </div>
+            )}
+            
             {/* Search trails */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none">
               <defs>
-                <path id="searchPath" d="M 50,90 Q 30,50 50,10 Q 70,50 50,90" />
+                <radialGradient id="convergence">
+                  <stop offset="0%" stopColor="rgba(34, 197, 94, 0.2)" />
+                  <stop offset="100%" stopColor="rgba(34, 197, 94, 0)" />
+                </radialGradient>
               </defs>
-              <path
-                d="M 50,90 Q 30,50 50,10 Q 70,50 50,90"
-                stroke="rgba(102, 126, 234, 0.3)"
-                strokeWidth="1"
-                fill="none"
-                strokeDasharray="5,5"
-                className="animate-dash"
-              />
+              {isAnimating && (
+                <circle
+                  cx="50%"
+                  cy="50%"
+                  r="20%"
+                  fill="url(#convergence)"
+                  className="animate-pulse"
+                />
+              )}
             </svg>
           </div>
           <div className="mt-4 text-center text-sm text-gray-400">
@@ -193,13 +251,32 @@ export function SearchSpaceVisualization({ isAnimating, parameters }: SearchSpac
         </div>
       </div>
 
+      {/* Control Buttons */}
+      <div className="mt-6 flex justify-center gap-4">
+        <button
+          onClick={startAnimation}
+          disabled={internalAnimating}
+          className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Play className="w-4 h-4" />
+          {internalAnimating ? '演示中...' : '开始演示'}
+        </button>
+        <button
+          onClick={resetAnimation}
+          className="flex items-center gap-2 px-6 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-all"
+        >
+          <RotateCcw className="w-4 h-4" />
+          重置
+        </button>
+      </div>
+
       {/* Info Box */}
       <div className="mt-8 bg-blue-400/10 border-l-4 border-blue-400 p-6 rounded-r-lg">
         <h4 className="text-lg font-semibold text-blue-400 mb-3">💡 算法效率对比</h4>
         <p className="text-gray-300 leading-relaxed">
           穷举搜索需要评估所有可能的组合，时间复杂度为指数级。而智能优化算法通过启发式搜索，
-          只需评估极小部分组合（约0.00001%）就能找到近似最优解。这就是为什么文艺复兴科技
-          能够每天处理海量因子组合，而普通方法却无法实现的原因。
+          只需评估极小部分组合（约0.00001%）就能找到近似最优解。遗传算法通过模拟自然进化过程，
+          从分散的搜索点逐渐收敛到最优解区域。
         </p>
       </div>
     </section>

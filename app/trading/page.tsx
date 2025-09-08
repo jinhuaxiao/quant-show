@@ -54,26 +54,28 @@ export default function TradingSystemPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background))] to-[hsl(218_28%_12%)] text-foreground">
-      <div className="max-w-[1920px] mx-auto p-4 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] to-[#151932] text-gray-200">
+      <div className="w-full px-4 lg:px-8">
         {/* Header */}
-        <header className="flex items-center justify-between py-6 border-b border-border mb-8">
-          <div className="flex items-center space-x-4">
-            <Link 
-              href="/" 
-              className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span>返回主页</span>
-            </Link>
-            <div className="h-6 border-l border-border" />
-            <div>
-              <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                MEDALLION ALGORITHM SYSTEM
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                量化交易完整流程可视化 - 从因子筛选到股票选择
-              </p>
+        <header className="py-6 border-b border-gray-700 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <Link 
+                href="/" 
+                className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span className="hidden sm:inline">返回主页</span>
+              </Link>
+              <div className="h-6 border-l border-gray-700" />
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                  MEDALLION ALGORITHM SYSTEM
+                </h1>
+                <p className="text-gray-400 text-sm mt-1 hidden sm:block">
+                  量化交易完整流程可视化 - 从因子筛选到股票选择
+                </p>
+              </div>
             </div>
           </div>
         </header>
@@ -85,7 +87,7 @@ export default function TradingSystemPage() {
         />
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6 mb-6">
           {/* Factor Pool */}
           <div className="lg:col-span-1">
             <FactorPool 
@@ -117,7 +119,7 @@ export default function TradingSystemPage() {
         </div>
 
         {/* Second Row - Convergence and Stock Selection */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6 mb-6">
           {/* Convergence Chart */}
           <div className="lg:col-span-1">
             <ConvergenceChart 
@@ -145,7 +147,7 @@ export default function TradingSystemPage() {
         />
 
         {/* System Controls and Logs */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6 mt-6">
           {/* System Controls */}
           <div className="lg:col-span-1">
             <SystemControls 
