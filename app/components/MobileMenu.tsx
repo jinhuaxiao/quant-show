@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, TrendingUp, Activity, Home, Wallet, BarChart3, Layers } from 'lucide-react';
+import { Menu, X, TrendingUp, Activity, Home, Wallet, BarChart3, Layers, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface MobileMenuProps {
@@ -17,6 +17,7 @@ export function MobileMenu({ onOpenDemo }: MobileMenuProps) {
     { icon: TrendingUp, label: '交易流程', href: '/trading' },
     { icon: BarChart3, label: '回测分析', href: '/backtest-analysis' },
     { icon: Layers, label: '因子分析', href: '/factor-analysis' },
+    { icon: Clock, label: '时序分析', href: '/temporal-analysis' },
     { icon: Wallet, label: '资金管理', href: '/fund-management' },
     { icon: Activity, label: '算法演示', action: () => { onOpenDemo(); setIsOpen(false); } },
   ];

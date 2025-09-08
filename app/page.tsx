@@ -54,6 +54,10 @@ export default function MedallionAlgorithm() {
                 <Layers className="w-4 h-4" />
                 因子分析
               </Link>
+              <Link href="/temporal-analysis" className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
+                <Activity className="w-4 h-4" />
+                时序分析
+              </Link>
               <Link href="/fund-management" className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
                 <Wallet className="w-4 h-4" />
                 资金管理
